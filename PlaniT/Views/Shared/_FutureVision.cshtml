@@ -1,0 +1,899 @@
+﻿@model List<PlaniT.Models.FutureVisionItem>
+
+<div class="space-y-6">
+    <!-- Add New Vision Item Section -->
+    <div class="bg-gradient-to-r from-accent/5 via-orange-50/50 to-yellow-50/50 border-2 border-dashed border-accent/20 hover:border-accent/40 rounded-2xl p-6 transition-all duration-300">
+        <form id="add-vision-form">
+            @Html.AntiForgeryToken()
+            <div class="flex items-center space-x-4">
+                <div class="w-12 h-12 bg-gradient-to-r from-accent to-orange-500 rounded-xl flex items-center justify-center shadow-lg">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <textarea id="future-vision-input"
+                    name="visionText"
+                    placeholder="Add your future goals, dreams, or ideas to your vision...
+&#10;💡 Examples:
+&#10;• Learn a new programming language by end of year
+&#10;• Start my own business in tech industry
+&#10;• Travel to Japan and experience the culture
+&#10;• Write and publish a book about my experiences"
+                    rows="3"
+                    class="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all duration-200 placeholder-gray-500 focus:-translate-y-0.5 focus:shadow-lg resize-none"
+                    autocomplete="off"></textarea>
+                </div>
+                <button type="submit"
+                id="add-future-vision"
+                class="px-6 py-3 bg-gradient-to-r from-accent to-orange-500 text-white font-semibold rounded-xl hover:shadow-lg transition-all duration-200 hover:scale-105 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    <span>Add Vision</span>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Vision Items List -->
+    <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-white/50 overflow-hidden">
+        @if (Model == null || !Model.Any())
+        {
+            <!-- Empty State -->
+            <div class="flex flex-col items-center justify-center py-16 px-8">
+                <div class="w-20 h-20 bg-gradient-to-br from-amber-100 to-orange-200 rounded-full flex items-center justify-center mb-6 shadow-lg">
+                    <svg class="w-10 h-10 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-700 mb-2">No Vision Items Yet</h3>
+                <p class="text-gray-500 text-center max-w-md">Start building your future by adding goals, dreams, and ideas that inspire you to grow.</p>
+            </div>
+        }
+        else
+        {
+            <!-- Vision Counter Header -->
+            <div class="bg-gradient-to-r from-accent/10 to-orange-100/50 px-6 py-4 border-b border-gray-100">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 bg-gradient-to-r from-accent to-orange-500 rounded-lg flex items-center justify-center">
+                            <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800">Future Vision Board</h3>
+                            <p class="text-sm text-gray-600">@Model.Count() @(Model.Count() == 1 ? "vision" : "visions") for your future</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <div class="text-accent font-semibold text-lg">@Model.Count()</div>
+                        <div class="w-2 h-2 bg-accent rounded-full animate-pulse"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vision Items Grid -->
+            <div class="p-6">
+                <ul id="future-vision-list" class="grid gap-4 md:grid-cols-2 lg:grid-cols-1">
+                    @foreach (var item in Model)
+                    {
+                        <li class="group bg-gradient-to-br from-amber-50/50 to-orange-50/50 hover:from-amber-100/70 hover:to-orange-100/70 border border-amber-200/50 hover:border-amber-300/70 rounded-xl p-4 transition-all duration-300 hover:shadow-md hover:scale-[1.01]" data-vision-id="@item.Id">
+                            <div class="flex items-start justify-between">
+                                <div class="flex items-start space-x-3 flex-1">
+                                    <!-- Vision Icon -->
+                                    <div class="w-3 h-3 bg-gradient-to-r from-accent to-orange-500 rounded-full flex-shrink-0 mt-2 shadow-sm"></div>
+
+                                    <!-- Vision Content with Collapse/Expand -->
+                                    <div class="flex-1">
+                                        @{
+                                            var lines = item.Text.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                                            var firstLine = lines.FirstOrDefault() ?? item.Text;
+                                            var hasMultipleLines = lines.Length > 1;
+                                        }
+
+                                        @if (hasMultipleLines)
+                                        {
+                                            <!-- First Line (Always Visible) -->
+                                            <div class="vision-preview text-gray-800 font-medium leading-relaxed px-3 py-2 rounded-lg"
+                                            data-id="@item.Id">
+                                                <span class="vision-first-line">@Html.Raw(Html.Encode(firstLine))</span>
+                                                <button type="button"
+                                                class="toggle-vision-btn ml-2 text-accent hover:text-orange-500 font-semibold text-sm transition-colors duration-200"
+                                                data-expanded="false">
+                                                    <span class="expand-text">... عرض المزيد</span>
+                                                    <span class="collapse-text hidden">عرض أقل</span>
+                                                </button>
+                                            </div>
+
+                                            <!-- Full Content (Hidden by default) -->
+                                            <div contenteditable="true"
+                                            class="future-vision-text hidden flex-1 text-gray-800 font-medium leading-relaxed hover:bg-white/70 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent/30 focus:bg-white transition-all duration-200 cursor-text min-h-[2.5rem] whitespace-pre-wrap"
+                                            data-id="@item.Id"
+                                            data-original="@Html.Raw(Html.Encode(item.Text))">
+                                                @Html.Raw(Html.Encode(item.Text))
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <!-- Single Line Content (Editable) -->
+                                            <div contenteditable="true"
+                                            class="future-vision-text flex-1 text-gray-800 font-medium leading-relaxed hover:bg-white/70 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent/30 focus:bg-white transition-all duration-200 cursor-text min-h-[2.5rem] whitespace-pre-wrap"
+                                            data-id="@item.Id"
+                                            data-original="@Html.Raw(Html.Encode(item.Text))">
+                                                @Html.Raw(Html.Encode(item.Text))
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+
+                                <!-- Actions -->
+                                <div class="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-all duration-200 ml-3">
+                                    <!-- Edit Indicator -->
+                                    <div class="text-xs text-gray-400 font-medium whitespace-nowrap">Click to edit</div>
+
+                                    <!-- Delete Button -->
+                                    <button type="button"
+                                    class="delete-future-vision w-8 h-8 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg flex items-center justify-center transition-all duration-200 hover:scale-110 flex-shrink-0"
+                                    data-id="@item.Id"
+                                    title="Delete vision">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </li>
+                    }
+                </ul>
+            </div>
+        }
+    </div>
+
+    <!-- Collapsed View Section -->
+    <div class="bg-white/95 backdrop-blur-sm rounded-2xl shadow-lg border border-white/50 overflow-hidden">
+        <div class="bg-gradient-to-r from-blue-50/80 to-indigo-100/50 px-6 py-4 border-b border-gray-100">
+            <button id="toggle-all-visions"
+            class="w-full flex items-center justify-between text-left focus:outline-none">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-lg flex items-center justify-center">
+                        <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800">All Visions Overview</h3>
+                        <p class="text-sm text-gray-600">Click to view all your visions in one consolidated view</p>
+                    </div>
+                </div>
+                <div class="transition-transform duration-200">
+                    <svg id="toggle-icon" class="w-5 h-5 text-gray-500 transform rotate-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+            </button>
+        </div>
+
+        <div id="all-visions-content" class="hidden">
+            @if (Model != null && Model.Any())
+            {
+                <div class="p-6">
+                    <div class="bg-gradient-to-br from-blue-50/50 to-indigo-50/50 rounded-xl p-4 mb-4">
+                        <div class="flex items-center space-x-2 mb-3">
+                            <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path>
+                                <path fill-rule="evenodd" d="M4 5a2 2 0 012-2v1a1 1 0 102 0V3a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"></path>
+                            </svg>
+                            <h4 class="font-semibold text-blue-800">Quick Actions</h4>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            <button id="copy-all-visions"
+                            class="px-3 py-1.5 bg-blue-100 hover:bg-blue-200 text-blue-700 text-sm rounded-lg transition-colors duration-200 flex items-center space-x-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                </svg>
+                                <span>Copy All</span>
+                            </button>
+                            <button id="export-visions"
+                            class="px-3 py-1.5 bg-green-100 hover:bg-green-200 text-green-700 text-sm rounded-lg transition-colors duration-200 flex items-center space-x-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                <span>Export</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-50/50 rounded-xl p-4">
+                        <textarea id="all-visions-textarea"
+                        readonly
+                        class="w-full h-64 p-4 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-gray-700 leading-relaxed"
+                        placeholder="Your visions will appear here...">@if (Model != null && Model.Any())
+                            {
+                                string.Join("\n\n", Model.Select((item, index) => $"{index + 1}. {item.Text}"));
+                            }
+                        </textarea>
+                        <div class="flex items-center justify-between mt-3 text-sm text-gray-500">
+                            <span>Total: @(Model?.Count() ?? 0) visions</span>
+                            <span>Words: <span id="word-count">@(Model?.Sum(v => v.Text.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length) ?? 0)</span></span>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="p-6 text-center text-gray-500">
+                    <svg class="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    <p>No visions to display. Add some visions above to see them here.</p>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Inspiration Section -->
+    <div class="bg-gradient-to-r from-purple-50/80 to-pink-50/80 border border-purple-200/50 rounded-xl p-4">
+        <div class="flex items-start space-x-3">
+            <div class="w-5 h-5 text-purple-500 flex-shrink-0 mt-0.5">
+                <svg fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"></path>
+                </svg>
+            </div>
+            <div>
+                <h4 class="text-sm font-semibold text-purple-800 mb-1">Vision Board Tips</h4>
+                <p class="text-sm text-purple-700">
+                    Dream big! Add your long-term goals, aspirations, and ideas here. Whether it's career ambitions,
+                    personal growth, travel dreams, or creative projects - capture what inspires your future self.
+                </p>
+            </div>
+        </div>
+    </div>
+    <style>
+        .animate-in {
+            animation: slideIn 0.2s ease-out;
+        }
+
+        @@keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .custom-confirmation-overlay .bg-white {
+            transform: scale(0.95);
+            opacity: 0;
+            transition: all 0.2s ease-out;
+        }
+
+        .scale-100 {
+            transform: scale(1) !important;
+        }
+
+        .opacity-100 {
+            opacity: 1 !important;
+        }
+    </style>
+</div>
+
+<script>
+    $(document).ready(function() {
+        // Get the anti-forgery token
+        function getAntiForgeryToken() {
+            return $('input[name="__RequestVerificationToken"]').val() ||
+                   $('form#add-vision-form input[name="__RequestVerificationToken"]').val();
+        }
+
+        // Enhanced form submission with textarea support
+        $('#add-vision-form').on('submit', function(e) {
+            e.preventDefault();
+
+            const form = $(this);
+            const button = $('#add-future-vision');
+            const textarea = $('#future-vision-input');
+            const originalContent = button.html();
+            const text = textarea.val().trim();
+
+            if (!text) {
+                showNotification('⚠️ Please enter your vision or goal', 'error');
+                textarea.focus().addClass('ring-2 ring-red-500');
+                setTimeout(() => textarea.removeClass('ring-2 ring-red-500'), 2000);
+                return;
+            }
+
+            // Prevent duplicate submissions
+            if (button.prop('disabled')) return;
+
+            // Loading state
+            button.prop('disabled', true).html(`
+                <svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Adding...</span>
+            `);
+
+            $.ajax({
+                url: '/FutureVision/Add',
+                type: 'POST',
+                data: {
+                    text: text,
+                    __RequestVerificationToken: getAntiForgeryToken()
+                },
+                success: function (response) {
+                    textarea.val('').removeClass('ring-2 ring-red-500');
+                    // Reset textarea height
+                    textarea.css('height', 'auto');
+                    showNotification('✅ Vision added to your future board!', 'success');
+
+                    // Add to DOM instead of full reload to prevent duplicates
+                    if (response && response.html) {
+                        addVisionToDOM(response.html);
+                    } else {
+                        reloadFutureVision();
+                    }
+
+                    // Update collapsed view if it's open
+                    if (!$('#all-visions-content').hasClass('hidden')) {
+                        setTimeout(updateAllVisionsText, 100);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('Add failed:', xhr.responseText);
+                    let errorMessage = '❌ Failed to add vision. Please try again.';
+
+                    if (xhr.status === 400) {
+                        errorMessage = '⚠️ Invalid request. Please check your input.';
+                    } else if (xhr.status === 403) {
+                        errorMessage = '🔒 Security validation failed. Please refresh the page.';
+                    } else if (xhr.status === 429) {
+                        errorMessage = '⏱️ Too many requests. Please wait a moment.';
+                    }
+
+                    showNotification(errorMessage, 'error');
+                },
+                complete: function() {
+                    button.prop('disabled', false).html(originalContent);
+                }
+            });
+        });
+
+        // Support Ctrl+Enter for form submission in textarea
+        $('#future-vision-input').on('keydown', function(e) {
+            if (e.ctrlKey && e.which === 13) {
+                e.preventDefault();
+                $('#add-vision-form').submit();
+            }
+        });
+
+        // Enhanced delete functionality with custom confirmation
+        $(document).on('click', '.delete-future-vision', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const button = $(this);
+            const id = button.data('id');
+            const visionElement = button.closest('li');
+            const visionText = visionElement.find('.future-vision-text').text().trim() ||
+                              visionElement.find('.vision-first-line').text().trim();
+            const truncatedText = visionText.length > 50 ? visionText.substring(0, 50) + '...' : visionText;
+
+            // Show custom confirmation dialog
+            showCustomConfirmation({
+                title: '🗑️ Delete Vision?',
+                message: `"${truncatedText}"`,
+                subMessage: 'This action cannot be undone.',
+                confirmText: 'Delete',
+                cancelText: 'Cancel',
+                confirmClass: 'bg-red-500 hover:bg-red-600',
+                onConfirm: function() {
+                    // Prevent multiple clicks
+                    if (button.prop('disabled')) return;
+                    button.prop('disabled', true);
+
+                    // Visual feedback
+                    visionElement.addClass('opacity-50 pointer-events-none');
+
+                    $.ajax({
+                        url: '/FutureVision/Delete',
+                        type: 'POST',
+                        data: {
+                            id: id,
+                            __RequestVerificationToken: getAntiForgeryToken()
+                        },
+                        success: function(response) {
+                            showNotification('✅ Vision deleted successfully!', 'success');
+                            // Remove from DOM smoothly
+                            visionElement.fadeOut(300, function() {
+                                $(this).remove();
+                                // Update counter if needed
+                                updateVisionCounter();
+                                // Update collapsed view if it's open
+                                if (!$('#all-visions-content').hasClass('hidden')) {
+                                    setTimeout(updateAllVisionsText, 100);
+                                }
+                            });
+                        },
+                        error: function (xhr, status, error) {
+                            console.error('Delete failed:', xhr.responseText);
+                            let errorMessage = '❌ Failed to delete vision. Please try again.';
+
+                            if (xhr.status === 404) {
+                                errorMessage = '⚠️ Vision not found. It may have been already deleted.';
+                            } else if (xhr.status === 403) {
+                                errorMessage = '🔒 Security validation failed. Please refresh the page.';
+                            }
+
+                            showNotification(errorMessage, 'error');
+                            visionElement.removeClass('opacity-50 pointer-events-none');
+                        },
+                        complete: function() {
+                            button.prop('disabled', false);
+                        }
+                    });
+                }
+            });
+        });
+
+        // Enhanced inline editing with debouncing to prevent multiple saves
+        let editTimeout = null;
+
+        $(document).on('focus', '.future-vision-text', function() {
+            const element = $(this);
+            element.addClass('ring-2 ring-accent/30 bg-white shadow-sm');
+            element.data('original', element.text().trim());
+        });
+
+        $(document).on('blur', '.future-vision-text', function () {
+            const element = $(this);
+            const id = element.data('id');
+            const newText = element.text().trim();
+            const originalText = element.data('original');
+
+            element.removeClass('ring-2 ring-accent/30 bg-white shadow-sm');
+
+            if (!newText) {
+                showNotification('⚠️ Vision cannot be empty', 'error');
+                element.text(originalText);
+                return;
+            }
+
+            if (newText === originalText) return; // No change
+
+            // Clear any existing timeout
+            if (editTimeout) {
+                clearTimeout(editTimeout);
+            }
+
+            // Debounce the save operation
+            editTimeout = setTimeout(() => {
+                // Check if element still exists and hasn't changed again
+                if (element.length && element.text().trim() === newText) {
+                    saveVisionEdit(element, id, newText, originalText);
+                }
+            }, 500);
+        });
+
+        function saveVisionEdit(element, id, newText, originalText) {
+            // Visual feedback during save
+            element.addClass('opacity-50 pointer-events-none');
+
+            $.ajax({
+                url: '/FutureVision/Edit',
+                type: 'POST',
+                data: {
+                    id: id,
+                    text: newText,
+                    __RequestVerificationToken: getAntiForgeryToken()
+                },
+                success: function(response) {
+                    showNotification('✅ Vision updated successfully!', 'success');
+                    element.removeClass('opacity-50 pointer-events-none');
+                    element.data('original', newText); // Update the original text
+
+                    // Update the preview if it exists
+                    const visionItem = element.closest('li');
+                    const preview = visionItem.find('.vision-preview');
+                    if (preview.length) {
+                        const lines = newText.split(/\r?\n/).filter(line => line.trim());
+                        const firstLine = lines[0] || newText;
+                        preview.find('.vision-first-line').text(firstLine);
+
+                        // Show/hide toggle based on multiple lines
+                        const toggleBtn = preview.find('.toggle-vision-btn');
+                        if (lines.length > 1) {
+                            toggleBtn.show();
+                        } else {
+                            toggleBtn.hide();
+                            // If single line, show the editable content and hide preview
+                            preview.addClass('hidden');
+                            element.removeClass('hidden');
+                        }
+                    }
+
+                    // Update collapsed view if it's open
+                    if (!$('#all-visions-content').hasClass('hidden')) {
+                        setTimeout(updateAllVisionsText, 100);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('Edit failed:', xhr.responseText);
+                    let errorMessage = '❌ Failed to update vision. Please try again.';
+
+                    if (xhr.status === 400) {
+                        errorMessage = '⚠️ Invalid vision text. Please check your input.';
+                    } else if (xhr.status === 404) {
+                        errorMessage = '🔍 Vision not found. Please refresh the page.';
+                    } else if (xhr.status === 403) {
+                        errorMessage = '🔒 Security validation failed. Please refresh the page.';
+                    }
+
+                    showNotification(errorMessage, 'error');
+                    element.text(originalText);
+                    element.removeClass('opacity-50 pointer-events-none');
+                }
+            });
+        }
+
+        // Individual vision collapse/expand functionality
+        $(document).on('click', '.toggle-vision-btn', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const button = $(this);
+            const visionItem = button.closest('li');
+            const preview = visionItem.find('.vision-preview');
+            const fullContent = visionItem.find('.future-vision-text');
+            const isExpanded = button.data('expanded') === true;
+
+            if (isExpanded) {
+                // Collapse: Show preview, hide full content
+                fullContent.addClass('hidden');
+                preview.removeClass('hidden');
+                button.data('expanded', false);
+                button.find('.expand-text').removeClass('hidden');
+                button.find('.collapse-text').addClass('hidden');
+            } else {
+                // Expand: Hide preview, show full content
+                preview.addClass('hidden');
+                fullContent.removeClass('hidden');
+                button.data('expanded', true);
+                button.find('.expand-text').addClass('hidden');
+                button.find('.collapse-text').removeClass('hidden');
+            }
+        });
+
+        // Auto-resize textarea
+        $('#future-vision-input').on('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 150) + 'px';
+        });
+
+        // Toggle all visions view
+        $('#toggle-all-visions').on('click', function() {
+            const content = $('#all-visions-content');
+            const icon = $('#toggle-icon');
+
+            if (content.hasClass('hidden')) {
+                content.removeClass('hidden').hide().slideDown(300);
+                icon.addClass('rotate-180');
+                updateAllVisionsText();
+            } else {
+                content.slideUp(300, function() {
+                    $(this).addClass('hidden');
+                });
+                icon.removeClass('rotate-180');
+            }
+        });
+
+        // Copy all visions to clipboard with better feedback
+        $('#copy-all-visions').on('click', function() {
+            const textarea = $('#all-visions-textarea');
+            const content = textarea.val();
+
+            if (!content.trim()) {
+                showNotification('⚠️ No visions to copy', 'error');
+                return;
+            }
+
+            // Try modern clipboard API first
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(content).then(() => {
+                    showNotification('📋 All visions copied to clipboard!', 'success');
+                }).catch(() => {
+                    // Fallback to textarea selection
+                    copyFallback(textarea, content);
+                });
+            } else {
+                // Fallback for older browsers
+                copyFallback(textarea, content);
+            }
+        });
+
+        function copyFallback(textarea, content) {
+            try {
+                textarea.select();
+                textarea[0].setSelectionRange(0, 99999); // For mobile devices
+                document.execCommand('copy');
+                showNotification('📋 All visions copied to clipboard!', 'success');
+            } catch (err) {
+                console.error('Copy failed:', err);
+                showNotification('❌ Failed to copy to clipboard. Please select and copy manually.', 'error');
+                textarea.select();
+            }
+        }
+
+        // Export visions as text file with validation
+        $('#export-visions').on('click', function() {
+            const content = $('#all-visions-textarea').val();
+
+            if (!content.trim()) {
+                showNotification('⚠️ No visions to export', 'error');
+                return;
+            }
+
+            try {
+                const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+
+                a.href = url;
+                a.download = `Future_Visions_${new Date().toISOString().split('T')[0]}.txt`;
+                a.style.display = 'none';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+
+                showNotification('📁 Visions exported successfully!', 'success');
+            } catch (err) {
+                console.error('Export failed:', err);
+                showNotification('❌ Failed to export visions. Please try again.', 'error');
+            }
+        });
+
+        // Update all visions textarea
+        function updateAllVisionsText() {
+            const visions = [];
+            $('#future-vision-list li').each(function(index) {
+                const visionItem = $(this);
+                const fullText = visionItem.find('.future-vision-text').text().trim();
+                const previewText = visionItem.find('.vision-first-line').text().trim();
+
+                // Use full text if available, otherwise use preview text
+                const text = fullText || previewText;
+                if (text) {
+                    visions.push(`${index + 1}. ${text}`);
+                }
+            });
+
+            const textarea = $('#all-visions-textarea');
+            textarea.val(visions.join('\n\n'));
+
+            // Update word count
+            const wordCount = visions.join(' ').split(/\s+/).filter(word => word.length > 0).length;
+            $('#word-count').text(wordCount);
+        }
+
+        // Enter key support for inline editing
+        $(document).on('keypress', '.future-vision-text', function(e) {
+            if (e.which === 13) {
+                e.preventDefault();
+                $(this).blur();
+            }
+        });
+
+        // Escape key to cancel editing
+        $(document).on('keydown', '.future-vision-text', function(e) {
+            if (e.which === 27) { // Escape key
+                const original = $(this).data('original');
+                $(this).text(original).blur();
+            }
+        });
+
+        // Prevent form submission when pressing enter in contenteditable
+        $(document).on('keydown', '.future-vision-text', function(e) {
+            if (e.which === 13) {
+                e.preventDefault();
+                $(this).blur();
+            }
+        });
+    });
+
+    // Helper functions to prevent duplicate operations
+    function addVisionToDOM(html) {
+        const visionList = $('#future-vision-list');
+        const emptyState = $('.space-y-6').find('.flex.flex-col.items-center.justify-center');
+
+        if (emptyState.length) {
+            // Replace empty state with vision list
+            reloadFutureVision();
+        } else if (visionList.length) {
+            // Add to existing list
+            visionList.prepend(html);
+            updateVisionCounter();
+        } else {
+            // Fallback to full reload
+            reloadFutureVision();
+        }
+    }
+
+    function updateVisionCounter() {
+        const count = $('#future-vision-list li').length;
+        const counterElement = $('.text-accent.font-semibold.text-lg');
+        const descriptionElement = $('.text-sm.text-gray-600');
+
+        if (counterElement.length) {
+            counterElement.text(count);
+        }
+
+        if (descriptionElement.length) {
+            const visionWord = count === 1 ? 'vision' : 'visions';
+            descriptionElement.text(`${count} ${visionWord} for your future`);
+        }
+    }
+
+    function reloadFutureVision() {
+        const container = $('#future-vision-section').length ? $('#future-vision-section') : $('.space-y-6').parent();
+
+        // Prevent multiple simultaneous reloads
+        if (container.hasClass('reloading')) return;
+        container.addClass('reloading');
+
+        $.get('/FutureVision/Get', function(data) {
+            container.html(data);
+        }).fail(function(xhr) {
+            console.error('Reload failed:', xhr.responseText);
+            showNotification('❌ Failed to reload vision board. Please refresh the page.', 'error');
+        }).always(function() {
+            container.removeClass('reloading');
+        });
+    }
+
+    // Custom confirmation dialog function
+    function showCustomConfirmation(options) {
+        const {
+            title = 'Confirm Action',
+            message = 'Are you sure?',
+            subMessage = '',
+            confirmText = 'Yes',
+            cancelText = 'No',
+            confirmClass = 'bg-red-500 hover:bg-red-600',
+            onConfirm = () => {},
+            onCancel = () => {}
+        } = options;
+
+        // Remove existing confirmation dialogs
+        $('.custom-confirmation-overlay').remove();
+
+        const confirmationHTML = `
+            <div class="custom-confirmation-overlay fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
+                <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 transform animate-in">
+                    <div class="p-6">
+                        <div class="flex items-center space-x-3 mb-4">
+                            <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                                <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900">${title}</h3>
+                            </div>
+                        </div>
+                        <div class="mb-6">
+                            <p class="text-gray-700 mb-2 font-medium">${message}</p>
+                            ${subMessage ? `<p class="text-gray-500 text-sm">${subMessage}</p>` : ''}
+                        </div>
+                        <div class="flex space-x-3 justify-end">
+                            <button class="confirmation-cancel px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors duration-200">
+                                ${cancelText}
+                            </button>
+                            <button class="confirmation-confirm px-4 py-2 ${confirmClass} text-white rounded-lg font-medium transition-colors duration-200">
+                                ${confirmText}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        $('body').append(confirmationHTML);
+
+        // Add animation class
+        setTimeout(() => {
+            $('.custom-confirmation-overlay .bg-white').addClass('scale-100 opacity-100');
+        }, 10);
+
+        // Handle confirm
+        $('.confirmation-confirm').on('click', function() {
+            $('.custom-confirmation-overlay').remove();
+            onConfirm();
+        });
+
+        // Handle cancel
+        $('.confirmation-cancel, .custom-confirmation-overlay').on('click', function(e) {
+            if (e.target === this) {
+                $('.custom-confirmation-overlay').remove();
+                onCancel();
+            }
+        });
+
+        // Handle escape key
+        $(document).on('keydown.confirmation', function(e) {
+            if (e.which === 27) { // Escape key
+                $('.custom-confirmation-overlay').remove();
+                onCancel();
+                $(document).off('keydown.confirmation');
+            }
+        });
+    }
+
+    // Global notification queue to prevent overlapping
+    window.notificationQueue = window.notificationQueue || [];
+    window.showingNotification = window.showingNotification || false;
+
+    function showNotification(message, type) {
+        // Add to queue if already showing notification
+        if (window.showingNotification) {
+            window.notificationQueue.push({message, type});
+            return;
+        }
+
+        window.showingNotification = true;
+
+        // Remove any existing notifications immediately
+        $('.notification-toast').remove();
+
+        const bgColor = type === 'success' ? 'bg-emerald-500' : 'bg-red-500';
+        const iconPath = type === 'success'
+            ? 'M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z'
+            : 'M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z';
+
+        const notification = $(`
+            <div class="notification-toast fixed top-4 right-4 ${bgColor} text-white px-4 py-3 rounded-lg shadow-lg z-[9999] transform translate-x-full transition-all duration-300 max-w-sm">
+                <div class="flex items-center space-x-3">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="${iconPath}" clip-rule="evenodd"></path>
+                    </svg>
+                    <span class="font-medium text-sm">${message}</span>
+                    <button class="ml-2 text-white/80 hover:text-white" onclick="$(this).closest('.notification-toast').remove(); window.showingNotification = false; processNotificationQueue();">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        `);
+
+        $('body').append(notification);
+
+        // Animate in
+        setTimeout(() => notification.removeClass('translate-x-full'), 50);
+
+        // Auto-hide after 4 seconds
+        setTimeout(() => {
+            if (notification.length) {
+                notification.addClass('translate-x-full');
+                setTimeout(() => {
+                    notification.remove();
+                    window.showingNotification = false;
+                    processNotificationQueue();
+                }, 300);
+            }
+        }, 4000);
+    }
+
+    function processNotificationQueue() {
+        if (window.notificationQueue.length > 0 && !window.showingNotification) {
+            const next = window.notificationQueue.shift();
+            showNotification(next.message, next.type);
+        }
+    }
+</script>

@@ -1,0 +1,498 @@
+﻿@model List<PlaniT.Models.DayCard>
+
+<div class="relative">
+    @if (Model == null || !Model.Any())
+    {
+        <!-- Empty State -->
+        <div class="flex flex-col items-center justify-center py-16 px-8">
+            <div class="w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mb-6 shadow-lg">
+                <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2z"></path>
+                </svg>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-700 mb-2">No Days Added Yet</h3>
+            <p class="text-gray-500 text-center max-w-md">Start planning your upcoming days by adding your first day card below.</p>
+        </div>
+    }
+    else
+    {
+        <!-- Horizontal Scrolling Cards Container -->
+        <div class="flex gap-6 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-4 scrollbar-thin scrollbar-track-slate-100 scrollbar-thumb-primary">
+            @foreach (var card in Model)
+            {
+                <div class="flex-shrink-0 w-80 bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-white/50 overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-[1.02] snap-start group">
+                    <!-- Card Header -->
+                    <div class="relative bg-gradient-to-r from-primary to-secondary p-6 text-white">
+                        <div class="absolute inset-0 bg-black/10"></div>
+                        <div class="relative flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V4a2 2 0 00-2-2H6zm2 2h4v2H8V4zm0 4h4v2H8V8zm0 4h4v2H8v-2z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-bold">@card.DayName</h3>
+                                    <p class="text-white/80 text-sm">@card.Tasks.Count() @(card.Tasks.Count() == 1 ? "task" : "tasks")</p>
+                                </div>
+                            </div>
+                            <button class="delete-day-card w-8 h-8 bg-red-500/80 hover:bg-red-600 rounded-lg flex items-center justify-center transition-all duration-200 hover:scale-110 opacity-0 group-hover:opacity-100"
+                                    data-id="@card.Id"
+                                    title="Delete day">
+                                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tasks List -->
+                    <div class="p-6 max-h-64 overflow-y-auto scrollbar-thin scrollbar-track-slate-100 scrollbar-thumb-primary">
+                        @if (!card.Tasks.Any())
+                        {
+                            <div class="flex flex-col items-center justify-center py-8">
+                                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                                    </svg>
+                                </div>
+                                <p class="text-gray-500 text-sm text-center">No tasks yet<br>Add your first task below</p>
+                            </div>
+                        }
+                        else
+                        {
+                            <ul class="space-y-3">
+                                @foreach (var task in card.Tasks)
+                                {
+                                    <li class="group/task flex items-center justify-between p-3 bg-gray-50/80 hover:bg-gray-100/80 rounded-xl transition-all duration-200">
+                                        <div class="flex items-center space-x-3 flex-1">
+                                            <div class="w-2 h-2 bg-gradient-to-r from-primary to-secondary rounded-full"></div>
+                                            <span class="task-text text-gray-700 font-medium cursor-pointer flex-1" data-id="@task.Id">@task.TaskText</span>
+                                            <input type="text" class="task-edit-input hidden flex-1 px-2 py-1 bg-white border border-gray-300 rounded text-gray-700 font-medium" data-id="@task.Id" value="@task.TaskText" />
+                                        </div>
+                                        <div class="flex items-center space-x-1">
+                                            <button class="edit-task w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-lg flex items-center justify-center transition-all duration-200 hover:scale-110 opacity-0 group-hover/task:opacity-100"
+                                                    data-id="@task.Id"
+                                                    title="Edit task">
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                                </svg>
+                                            </button>
+                                            <button class="save-task w-6 h-6 bg-green-100 hover:bg-green-200 text-green-600 rounded-lg flex items-center justify-center transition-all duration-200 hover:scale-110 hidden"
+                                                    data-id="@task.Id"
+                                                    title="Save task">
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                </svg>
+                                            </button>
+                                            <button class="cancel-edit w-6 h-6 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg flex items-center justify-center transition-all duration-200 hover:scale-110 hidden"
+                                                    data-id="@task.Id"
+                                                    title="Cancel edit">
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                                </svg>
+                                            </button>
+                                            <button class="delete-day-task w-6 h-6 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg flex items-center justify-center transition-all duration-200 hover:scale-110 opacity-0 group-hover/task:opacity-100"
+                                                    data-id="@task.Id"
+                                                    title="Delete task">
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </li>
+                                }
+                            </ul>
+                        }
+                    </div>
+
+                    <!-- Add Task Section -->
+                    <div class="p-6 pt-0">
+                        <div class="flex space-x-2">
+                            <input type="text"
+                                   class="day-task-input flex-1 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 placeholder-gray-500 focus:-translate-y-0.5 focus:shadow-lg"
+                                   data-id="@card.Id"
+                                   placeholder="Add a new task..." />
+                            <button class="add-day-task w-12 h-12 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl hover:shadow-lg transition-all duration-200 hover:scale-105 flex items-center justify-center"
+                                    data-id="@card.Id"
+                                    title="Add task">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    <!-- Add New Day Card Section -->
+    <div class="mt-8 p-6 bg-white/60 backdrop-blur-sm rounded-2xl border-2 border-dashed border-primary/30 hover:border-primary/50 transition-all duration-300">
+        <div class="flex items-center space-x-4">
+            <div class="w-12 h-12 bg-gradient-to-r from-primary to-secondary rounded-xl flex items-center justify-center shadow-lg">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+            </div>
+            <div class="flex-1">
+                <input type="text"
+                       id="day-card-name"
+                       placeholder="Enter day name (e.g., 'Monday', 'Tomorrow', 'Weekend Plans'...)"
+                       class="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 placeholder-gray-500" />
+            </div>
+            <button id="add-day-card"
+                    class="px-6 py-3 bg-gradient-to-r from-primary to-secondary text-white font-semibold rounded-xl hover:shadow-lg transition-all duration-200 hover:scale-105 flex items-center space-x-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2v12a2 2 0 002 2z"></path>
+                </svg>
+                <span>Add Day</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div id="confirmModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl">
+        <div class="flex items-center space-x-3 mb-4">
+            <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                </svg>
+            </div>
+            <h3 class="text-lg font-bold text-gray-900">Confirm Action</h3>
+        </div>
+        <p id="confirmMessage" class="text-gray-600 mb-6"></p>
+        <div class="flex space-x-3 justify-end">
+            <button id="cancelAction" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors duration-200">
+                Cancel
+            </button>
+            <button id="confirmAction" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200">
+                Delete
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Global variables to prevent multiple initializations
+    window.dayCardManager = window.dayCardManager || {
+        initialized: false,
+        pendingAction: null,
+        isProcessing: false
+    };
+
+    $(document).ready(function() {
+        // Prevent multiple initializations
+        if (window.dayCardManager.initialized) {
+            return;
+        }
+        window.dayCardManager.initialized = true;
+
+        // Show confirmation modal
+        function showConfirmModal(message, callback) {
+            $('#confirmMessage').text(message);
+            $('#confirmModal').removeClass('hidden');
+            window.dayCardManager.pendingAction = callback;
+        }
+
+        // Hide confirmation modal
+        function hideConfirmModal() {
+            $('#confirmModal').addClass('hidden');
+            window.dayCardManager.pendingAction = null;
+        }
+
+        // Modal event handlers - use off/on to prevent duplicate bindings
+        $('#cancelAction').off('click').on('click', hideConfirmModal);
+        $('#confirmAction').off('click').on('click', function() {
+            if (window.dayCardManager.pendingAction) {
+                window.dayCardManager.pendingAction();
+            }
+            hideConfirmModal();
+        });
+
+        // Close modal on backdrop click
+        $('#confirmModal').off('click').on('click', function(e) {
+            if (e.target === this) {
+                hideConfirmModal();
+            }
+        });
+
+        // Enhanced add day card functionality with duplicate prevention
+        $(document).off('click', '#add-day-card').on('click', '#add-day-card', function () {
+            if (window.dayCardManager.isProcessing) return;
+
+            const button = $(this);
+            const originalContent = button.html();
+            const dayName = $('#day-card-name').val().trim();
+
+            if (!dayName) {
+                showNotification('Please enter a day name', 'error');
+                $('#day-card-name').focus().addClass('ring-2 ring-red-500');
+                setTimeout(() => $('#day-card-name').removeClass('ring-2 ring-red-500'), 2000);
+                return;
+            }
+
+            window.dayCardManager.isProcessing = true;
+
+            // Loading state
+            button.prop('disabled', true).html(`
+                <svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Adding...</span>
+            `);
+
+            $.ajax({
+                url: '/DayCard/AddCard',
+                type: 'POST',
+                data: { dayName: dayName },
+                success: function () {
+                    $('#day-card-name').val('').removeClass('ring-2 ring-red-500');
+                    showNotification('Day added successfully!', 'success');
+                    reloadDayCard();
+                },
+                error: function (xhr) {
+                    console.error('Add card failed:', xhr.responseText);
+                    showNotification('Failed to add day. Please try again.', 'error');
+                },
+                complete: function() {
+                    button.prop('disabled', false).html(originalContent);
+                    window.dayCardManager.isProcessing = false;
+                }
+            });
+        });
+
+        // Enhanced add task functionality with duplicate prevention
+        $(document).off('click', '.add-day-task').on('click', '.add-day-task', function () {
+            if (window.dayCardManager.isProcessing) return;
+
+            const button = $(this);
+            const id = button.data('id');
+            const input = button.siblings('input');
+            const taskText = input.val().trim();
+
+            if (!taskText) {
+                showNotification('Please enter a task', 'error');
+                input.focus().addClass('ring-2 ring-red-500');
+                setTimeout(() => input.removeClass('ring-2 ring-red-500'), 2000);
+                return;
+            }
+
+            window.dayCardManager.isProcessing = true;
+
+            // Loading state
+            const originalContent = button.html();
+            button.prop('disabled', true).html(`
+                <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+            `);
+
+            $.ajax({
+                url: '/DayCard/AddTask',
+                type: 'POST',
+                data: { dayCardId: id, taskText: taskText },
+                success: function () {
+                    input.val('').removeClass('ring-2 ring-red-500');
+                    showNotification('Task added successfully!', 'success');
+                    reloadDayCard();
+                },
+                error: function (xhr) {
+                    console.error('Add task failed:', xhr.responseText);
+                    showNotification('Failed to add task. Please try again.', 'error');
+                },
+                complete: function() {
+                    button.prop('disabled', false).html(originalContent);
+                    window.dayCardManager.isProcessing = false;
+                }
+            });
+        });
+
+        // Task editing functionality
+        $(document).off('click', '.edit-task').on('click', '.edit-task', function () {
+            const taskId = $(this).data('id');
+            const taskContainer = $(this).closest('li');
+            const taskText = taskContainer.find('.task-text');
+            const taskInput = taskContainer.find('.task-edit-input');
+            const editBtn = taskContainer.find('.edit-task');
+            const saveBtn = taskContainer.find('.save-task');
+            const cancelBtn = taskContainer.find('.cancel-edit');
+
+            // Hide text and edit button, show input and save/cancel buttons
+            taskText.addClass('hidden');
+            editBtn.addClass('hidden');
+            taskInput.removeClass('hidden').focus();
+            saveBtn.removeClass('hidden');
+            cancelBtn.removeClass('hidden');
+        });
+
+        // Save task edit
+        $(document).on('click', '.save-task', function () {
+            if (isProcessing) return;
+
+            const taskId = $(this).data('id');
+            const taskContainer = $(this).closest('li');
+            const taskInput = taskContainer.find('.task-edit-input');
+            const newTaskText = taskInput.val().trim();
+
+            if (!newTaskText) {
+                showNotification('Task text cannot be empty', 'error');
+                return;
+            }
+
+            isProcessing = true;
+
+            $.ajax({
+                url: '/DayCard/EditTask',
+                type: 'POST',
+                data: { id: taskId, taskText: newTaskText },
+                success: function () {
+                    showNotification('Task updated successfully!', 'success');
+                    reloadDayCard();
+                },
+                error: function (xhr) {
+                    console.error('Edit task failed:', xhr.responseText);
+                    showNotification('Failed to update task. Please try again.', 'error');
+                },
+                complete: function() {
+                    isProcessing = false;
+                }
+            });
+        });
+
+        // Cancel task edit
+        $(document).on('click', '.cancel-edit', function () {
+            const taskContainer = $(this).closest('li');
+            const taskText = taskContainer.find('.task-text');
+            const taskInput = taskContainer.find('.task-edit-input');
+            const editBtn = taskContainer.find('.edit-task');
+            const saveBtn = taskContainer.find('.save-task');
+            const cancelBtn = taskContainer.find('.cancel-edit');
+
+            // Reset input value and show/hide appropriate elements
+            taskInput.val(taskText.text());
+            taskText.removeClass('hidden');
+            editBtn.removeClass('hidden');
+            taskInput.addClass('hidden');
+            saveBtn.addClass('hidden');
+            cancelBtn.addClass('hidden');
+        });
+
+        // Double-click to edit task
+        $(document).on('dblclick', '.task-text', function () {
+            const taskContainer = $(this).closest('li');
+            taskContainer.find('.edit-task').click();
+        });
+
+        // Enhanced delete task functionality with confirmation
+        $(document).on('click', '.delete-day-task', function () {
+            const id = $(this).data('id');
+            showConfirmModal('Are you sure you want to delete this task?', function() {
+                $.ajax({
+                    url: '/DayCard/DeleteTask',
+                    type: 'POST',
+                    data: { id: id },
+                    success: function() {
+                        showNotification('Task deleted successfully!', 'success');
+                        reloadDayCard();
+                    },
+                    error: function (xhr) {
+                        console.error('Delete task failed:', xhr.responseText);
+                        showNotification('Failed to delete task. Please try again.', 'error');
+                    }
+                });
+            });
+        });
+
+        // Enhanced delete day card functionality with confirmation
+        $(document).on('click', '.delete-day-card', function () {
+            const id = $(this).data('id');
+            showConfirmModal('Are you sure you want to delete this entire day and all its tasks?', function() {
+                $.ajax({
+                    url: '/DayCard/DeleteCard',
+                    type: 'POST',
+                    data: { id: id },
+                    success: function() {
+                        showNotification('Day deleted successfully!', 'success');
+                        reloadDayCard();
+                    }
+                    
+                    ,
+                    error: function (xhr) {
+                        console.error('Delete card failed:', xhr.responseText);
+                        showNotification('Failed to delete day. Please try again.', 'error');
+                    }
+                });
+            });
+        });
+
+        // Enter key support for inputs
+        $(document).on('keypress', '#day-card-name', function(e) {
+            if (e.which === 13 && !isProcessing) {
+                $('#add-day-card').click();
+            }
+        });
+
+        $(document).on('keypress', '.day-task-input', function(e) {
+            if (e.which === 13 && !isProcessing) {
+                const id = $(this).data('id');
+                $(`.add-day-task[data-id="${id}"]`).click();
+            }
+        });
+
+        $(document).on('keypress', '.task-edit-input', function(e) {
+            if (e.which === 13) {
+                const id = $(this).data('id');
+                $(`.save-task[data-id="${id}"]`).click();
+            } else if (e.which === 27) { // Escape key
+                const id = $(this).data('id');
+                $(`.cancel-edit[data-id="${id}"]`).click();
+            }
+        });
+    });
+
+    function reloadDayCard() {
+        $('#day-cards-section').load('/DayCard/Get', function (response, status, xhr) {
+            if (status === 'error') {
+                console.error('Reload failed:', xhr.responseText);
+                showNotification('Failed to reload days. Please refresh the page.', 'error');
+            }
+        });
+    }
+
+    function showNotification(message, type) {
+        // Remove any existing notifications first
+        $('.notification').remove();
+
+        const bgColor = type === 'success' ? 'bg-emerald-500' : 'bg-red-500';
+        const iconPath = type === 'success'
+            ? '<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>'
+            : '<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>';
+
+        const notification = $(`
+            <div class="notification fixed top-4 right-4 ${bgColor} text-white px-6 py-3 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform duration-300">
+                <div class="flex items-center space-x-2">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        ${iconPath}
+                    </svg>
+                    <span>${message}</span>
+                </div>
+            </div>
+        `);
+
+        $('body').append(notification);
+            
+        // Show notification
+        setTimeout(() => notification.removeClass('translate-x-full'), 100);
+
+        // Hide notification after 3 seconds
+        setTimeout(() => {
+            notification.addClass('translate-x-full');
+            setTimeout(() => notification.remove(), 300);
+        }, 2000);
+    }
+</script>

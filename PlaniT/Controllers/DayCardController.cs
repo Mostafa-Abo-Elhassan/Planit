@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PlaniT.Data;
 using PlaniT.Models;
+using System.Security.Claims;
 
 namespace PlaniT.Controllers
 {
+    [Authorize]
     public class DayCardController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -14,48 +17,74 @@ namespace PlaniT.Controllers
             _context = context;
         }
 
+        private string? GetUserId()
+        {
+            return User.FindFirstValue(ClaimTypes.NameIdentifier);
+        }
+
         [HttpGet]
         public IActionResult Get()
         {
-            var cards = _context.DayCards.Include(c => c.Tasks).ToList();
+            var userId = GetUserId();
+            if (userId == null)
+                return Json(new { redirectUrl = Url.Action("register", "Account") });
+
+            var cards = _context.DayCards
+                                .Include(c => c.Tasks)
+                                .Where(c => c.UserId == userId)
+                                .ToList();
+
             return PartialView("_DayCards", cards);
         }
 
         [HttpPost]
-        //[ValidateAntiForgeryToken]
         public IActionResult AddCard(string dayName)
         {
-            if (dayName == null)
+            var userId = GetUserId();
+            if (userId == null)
+                return Json(new { redirectUrl = Url.Action("register", "Account") });
+
+            if (string.IsNullOrWhiteSpace(dayName))
                 return BadRequest("Day name is required");
 
-            var card = new DayCard { DayName = dayName };
+            var card = new DayCard { DayName = dayName, UserId = userId };
+
             _context.DayCards.Add(card);
             _context.SaveChanges();
             return Ok();
         }
 
         [HttpPost]
-        //[ValidateAntiForgeryToken]
         public IActionResult AddTask(int dayCardId, string taskText)
         {
-            if (taskText == null || dayCardId == null)
+            var userId = GetUserId();
+            if (userId == null)
+                return Json(new { redirectUrl = Url.Action("register", "Account") });
+
+            if (string.IsNullOrWhiteSpace(taskText))
                 return BadRequest("Task text is required");
 
-            var card = _context.DayCards.Find(dayCardId);
+            var card = _context.DayCards.FirstOrDefault(c => c.Id == dayCardId && c.UserId == userId);
             if (card == null)
                 return NotFound();
 
-            var task = new DayTask { TaskText = taskText, DayCardId = dayCardId };
+            var task = new DayTask { TaskText = taskText, DayCardId = dayCardId, UserId = userId };
             _context.DayTasks.Add(task);
             _context.SaveChanges();
             return Ok();
         }
 
         [HttpPost]
-        //[ValidateAntiForgeryToken]
         public IActionResult DeleteTask(int id)
         {
-            var task = _context.DayTasks.Find(id);
+            var userId = GetUserId();
+            if (userId == null)
+                return Json(new { redirectUrl = Url.Action("register", "Account") });
+
+            var task = _context.DayTasks
+                               .Include(t => t.DayCard)
+                               .FirstOrDefault(t => t.Id == id && t.DayCard.UserId == userId);
+
             if (task == null)
                 return NotFound();
 
@@ -65,10 +94,16 @@ namespace PlaniT.Controllers
         }
 
         [HttpPost]
-        //[ValidateAntiForgeryToken]
         public IActionResult DeleteCard(int id)
         {
-            var card = _context.DayCards.Include(c => c.Tasks).FirstOrDefault(c => c.Id == id);
+            var userId = GetUserId();
+            if (userId == null)
+                return Json(new { redirectUrl = Url.Action("register", "Account") });
+
+            var card = _context.DayCards
+                               .Include(c => c.Tasks)
+                               .FirstOrDefault(c => c.Id == id && c.UserId == userId);
+
             if (card == null)
                 return NotFound();
 
@@ -79,17 +114,23 @@ namespace PlaniT.Controllers
         }
 
         [HttpPost]
-        //[ValidateAntiForgeryToken]
         public IActionResult EditTask(int id, string taskText)
         {
-            var item = _context.DayTasks.Find(id);
-            if (item == null)
+            var userId = GetUserId();
+            if (userId == null)
+                return Json(new { redirectUrl = Url.Action("register", "Account") });
+
+            if (string.IsNullOrWhiteSpace(taskText))
+                return BadRequest("Task text is required");
+
+            var task = _context.DayTasks
+                               .Include(t => t.DayCard)
+                               .FirstOrDefault(t => t.Id == id && t.DayCard.UserId == userId);
+
+            if (task == null)
                 return NotFound();
 
-            if (taskText == null)
-                return BadRequest("Title is required");
-
-            item.TaskText = taskText;
+            task.TaskText = taskText;
             _context.SaveChanges();
             return Ok();
         }

@@ -1,9 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using PlaniT.Data;
 using PlaniT.Models;
+using System.Security.Claims;
 
 namespace PlaniT.Controllers
 {
+    [Authorize]
     public class TodayTemplateController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -13,53 +17,78 @@ namespace PlaniT.Controllers
             _context = context;
         }
 
+        private string? GetUserId()
+        {
+            return User.FindFirstValue(ClaimTypes.NameIdentifier);
+        }
 
         [HttpGet]
-        public IActionResult Get()
+        public async Task<IActionResult> Get()
         {
-            var items = _context.TodayTemplateItems.ToList();
+            var userId = GetUserId();
+            if (userId == null)
+                return Json(new { redirectUrl = Url.Action("register", "Account") });
+
+            var items = await _context.TodayTemplateItems
+                                .Where(x => x.UserId == userId) // لو مستقبلًا حبيت تربط العناصر بالمستخدم
+                                .ToListAsync();
+
             return PartialView("_TodayTemplate", items);
         }
 
         [HttpPost]
-        //[ValidateAntiForgeryToken]
-        public IActionResult Add(string title)
+        public async Task<IActionResult> Add(string title)
         {
-            if (title == null)
+            var userId = GetUserId();
+            if (userId == null)
+                return Json(new { redirectUrl = Url.Action("register", "Account") });
+
+            if (string.IsNullOrWhiteSpace(title))
                 return BadRequest("Title is required");
 
-            var item = new TodayTemplateItem { Title = title };
-            _context.TodayTemplateItems.Add(item);
-            _context.SaveChanges();
+            var item = new TodayTemplateItem
+            {
+                Title = title,
+                UserId = userId // لو عايز تربط العنصر بالمستخدم مستقبلاً
+            };
+
+            await _context.TodayTemplateItems.AddAsync(item);
+            await _context.SaveChangesAsync();
             return Ok();
         }
 
         [HttpPost]
-        //[ValidateAntiForgeryToken]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            var item = _context.TodayTemplateItems.Find(id);
+            var userId = GetUserId();
+            if (userId == null)
+                return Json(new { redirectUrl = Url.Action("register", "Account") });
+
+            var item = await _context.TodayTemplateItems.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
             if (item == null)
                 return NotFound();
 
             _context.TodayTemplateItems.Remove(item);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             return Ok();
         }
 
         [HttpPost]
-        //[ValidateAntiForgeryToken]
-        public IActionResult Edit(int id, string title)
+        public async Task<IActionResult> Edit(int id, string title)
         {
-            var item = _context.TodayTemplateItems.Find(id);
+            var userId = GetUserId();
+            if (userId == null)
+                return Json(new { redirectUrl = Url.Action("register", "Account") });
+
+            if (string.IsNullOrWhiteSpace(title))
+                return BadRequest("Title is required");
+
+            var item = await _context.TodayTemplateItems.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
             if (item == null)
                 return NotFound();
 
-            if (title == null)
-                return BadRequest("Title is required");
-
             item.Title = title;
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             return Ok();
         }
     }

@@ -1,28 +1,7 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "C:\\Users\\workstation\\source\\repos\\PlaniT\\",
-  "Documents": [
-    {
-      "AbsoluteMoniker": "D:0:0:{A557D030-6A43-4167-AB10-7C3230989FCF}|PlaniT\\PlaniT.csproj|c:\\users\\workstation\\source\\repos\\planit\\planit\\views\\shared\\_todaytemplate.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{A557D030-6A43-4167-AB10-7C3230989FCF}|PlaniT\\PlaniT.csproj|solutionrelative:planit\\views\\shared\\_todaytemplate.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A557D030-6A43-4167-AB10-7C3230989FCF}|PlaniT\\PlaniT.csproj|c:\\users\\workstation\\source\\repos\\planit\\planit\\controllers\\todaytemplatecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A557D030-6A43-4167-AB10-7C3230989FCF}|PlaniT\\PlaniT.csproj|solutionrelative:planit\\controllers\\todaytemplatecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A557D030-6A43-4167-AB10-7C3230989FCF}|PlaniT\\PlaniT.csproj|c:\\users\\workstation\\source\\repos\\planit\\planit\\controllers\\futurevisioncontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A557D030-6A43-4167-AB10-7C3230989FCF}|PlaniT\\PlaniT.csproj|solutionrelative:planit\\controllers\\futurevisioncontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A557D030-6A43-4167-AB10-7C3230989FCF}|PlaniT\\PlaniT.csproj|c:\\users\\workstation\\source\\repos\\planit\\planit\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{A557D030-6A43-4167-AB10-7C3230989FCF}|PlaniT\\PlaniT.csproj|solutionrelative:planit\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A557D030-6A43-4167-AB10-7C3230989FCF}|PlaniT\\PlaniT.csproj|c:\\users\\workstation\\source\\repos\\planit\\planit\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A557D030-6A43-4167-AB10-7C3230989FCF}|PlaniT\\PlaniT.csproj|solutionrelative:planit\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    }
-  ],
+  "Documents": [],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
@@ -30,78 +9,8 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 3,
+          "SelectedChildIndex": -1,
           "Children": [
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "HomeController.cs",
-              "DocumentMoniker": "C:\\Users\\workstation\\source\\repos\\PlaniT\\PlaniT\\Controllers\\HomeController.cs",
-              "RelativeDocumentMoniker": "PlaniT\\Controllers\\HomeController.cs",
-              "ToolTip": "C:\\Users\\workstation\\source\\repos\\PlaniT\\PlaniT\\Controllers\\HomeController.cs",
-              "RelativeToolTip": "PlaniT\\Controllers\\HomeController.cs",
-              "ViewState": "AgIAAAkAAAAAMDMzMzPjvxYAAAASAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-26T23:34:39.902Z",
-              "IsPinned": true,
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "TodayTemplateController.cs",
-              "DocumentMoniker": "C:\\Users\\workstation\\source\\repos\\PlaniT\\PlaniT\\Controllers\\TodayTemplateController.cs",
-              "RelativeDocumentMoniker": "PlaniT\\Controllers\\TodayTemplateController.cs",
-              "ToolTip": "C:\\Users\\workstation\\source\\repos\\PlaniT\\PlaniT\\Controllers\\TodayTemplateController.cs",
-              "RelativeToolTip": "PlaniT\\Controllers\\TodayTemplateController.cs",
-              "ViewState": "AgIAACYAAAAAETMzMzMDwD8AAAAJAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-26T23:34:31.733Z",
-              "IsPinned": true,
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "_Layout.cshtml",
-              "DocumentMoniker": "C:\\Users\\workstation\\source\\repos\\PlaniT\\PlaniT\\Views\\Shared\\_Layout.cshtml",
-              "RelativeDocumentMoniker": "PlaniT\\Views\\Shared\\_Layout.cshtml",
-              "ToolTip": "C:\\Users\\workstation\\source\\repos\\PlaniT\\PlaniT\\Views\\Shared\\_Layout.cshtml",
-              "RelativeToolTip": "PlaniT\\Views\\Shared\\_Layout.cshtml",
-              "ViewState": "AgIAAA4AAAAAAAAAAAAqwBsAAABEAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-07-26T23:23:12.291Z",
-              "IsPinned": true,
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "_TodayTemplate.cshtml",
-              "DocumentMoniker": "C:\\Users\\workstation\\source\\repos\\PlaniT\\PlaniT\\Views\\Shared\\_TodayTemplate.cshtml",
-              "RelativeDocumentMoniker": "PlaniT\\Views\\Shared\\_TodayTemplate.cshtml",
-              "ToolTip": "C:\\Users\\workstation\\source\\repos\\PlaniT\\PlaniT\\Views\\Shared\\_TodayTemplate.cshtml",
-              "RelativeToolTip": "PlaniT\\Views\\Shared\\_TodayTemplate.cshtml",
-              "ViewState": "AgIAAPAAAACAy8zMzIwswPoAAAAVAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-07-26T22:51:28.504Z",
-              "IsPinned": true,
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "FutureVisionController.cs",
-              "DocumentMoniker": "C:\\Users\\workstation\\source\\repos\\PlaniT\\PlaniT\\Controllers\\FutureVisionController.cs",
-              "RelativeDocumentMoniker": "PlaniT\\Controllers\\FutureVisionController.cs",
-              "ToolTip": "C:\\Users\\workstation\\source\\repos\\PlaniT\\PlaniT\\Controllers\\FutureVisionController.cs",
-              "RelativeToolTip": "PlaniT\\Controllers\\FutureVisionController.cs",
-              "ViewState": "AgIAACQAAAAAAAAAAAAmwEAAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-26T23:20:44.629Z",
-              "IsPinned": true,
-              "EditorCaption": ""
-            },
             {
               "$type": "Bookmark",
               "Name": "ST:128:0:{75188d03-9892-4ae2-abf1-207126247ce5}"

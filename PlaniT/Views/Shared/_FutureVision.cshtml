@@ -283,7 +283,7 @@
     </style>
 </div>
 
-<script>
+@* <script>
     $(document).ready(function() {
         // Get the anti-forgery token
         function getAntiForgeryToken() {
@@ -319,6 +319,9 @@
                 </svg>
                 <span>Adding...</span>
             `);
+
+
+
 
             $.ajax({
                 url: '/FutureVision/Add',
@@ -751,6 +754,693 @@
             container.html(data);
         }).fail(function(xhr) {
             console.error('Reload failed:', xhr.responseText);
+            showNotification('❌ Failed to reload vision board. Please refresh the page.', 'error');
+        }).always(function() {
+            container.removeClass('reloading');
+        });
+    }
+
+    // Custom confirmation dialog function
+    function showCustomConfirmation(options) {
+        const {
+            title = 'Confirm Action',
+            message = 'Are you sure?',
+            subMessage = '',
+            confirmText = 'Yes',
+            cancelText = 'No',
+            confirmClass = 'bg-red-500 hover:bg-red-600',
+            onConfirm = () => {},
+            onCancel = () => {}
+        } = options;
+
+        // Remove existing confirmation dialogs
+        $('.custom-confirmation-overlay').remove();
+
+        const confirmationHTML = `
+            <div class="custom-confirmation-overlay fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
+                <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 transform animate-in">
+                    <div class="p-6">
+                        <div class="flex items-center space-x-3 mb-4">
+                            <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                                <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900">${title}</h3>
+                            </div>
+                        </div>
+                        <div class="mb-6">
+                            <p class="text-gray-700 mb-2 font-medium">${message}</p>
+                            ${subMessage ? `<p class="text-gray-500 text-sm">${subMessage}</p>` : ''}
+                        </div>
+                        <div class="flex space-x-3 justify-end">
+                            <button class="confirmation-cancel px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors duration-200">
+                                ${cancelText}
+                            </button>
+                            <button class="confirmation-confirm px-4 py-2 ${confirmClass} text-white rounded-lg font-medium transition-colors duration-200">
+                                ${confirmText}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        $('body').append(confirmationHTML);
+
+        // Add animation class
+        setTimeout(() => {
+            $('.custom-confirmation-overlay .bg-white').addClass('scale-100 opacity-100');
+        }, 10);
+
+        // Handle confirm
+        $('.confirmation-confirm').on('click', function() {
+            $('.custom-confirmation-overlay').remove();
+            onConfirm();
+        });
+
+        // Handle cancel
+        $('.confirmation-cancel, .custom-confirmation-overlay').on('click', function(e) {
+            if (e.target === this) {
+                $('.custom-confirmation-overlay').remove();
+                onCancel();
+            }
+        });
+
+        // Handle escape key
+        $(document).on('keydown.confirmation', function(e) {
+            if (e.which === 27) { // Escape key
+                $('.custom-confirmation-overlay').remove();
+                onCancel();
+                $(document).off('keydown.confirmation');
+            }
+        });
+    }
+
+    // Global notification queue to prevent overlapping
+    window.notificationQueue = window.notificationQueue || [];
+    window.showingNotification = window.showingNotification || false;
+
+    function showNotification(message, type) {
+        // Add to queue if already showing notification
+        if (window.showingNotification) {
+            window.notificationQueue.push({message, type});
+            return;
+        }
+
+        window.showingNotification = true;
+
+        // Remove any existing notifications immediately
+        $('.notification-toast').remove();
+
+        const bgColor = type === 'success' ? 'bg-emerald-500' : 'bg-red-500';
+        const iconPath = type === 'success'
+            ? 'M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z'
+            : 'M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z';
+
+        const notification = $(`
+            <div class="notification-toast fixed top-4 right-4 ${bgColor} text-white px-4 py-3 rounded-lg shadow-lg z-[9999] transform translate-x-full transition-all duration-300 max-w-sm">
+                <div class="flex items-center space-x-3">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="${iconPath}" clip-rule="evenodd"></path>
+                    </svg>
+                    <span class="font-medium text-sm">${message}</span>
+                    <button class="ml-2 text-white/80 hover:text-white" onclick="$(this).closest('.notification-toast').remove(); window.showingNotification = false; processNotificationQueue();">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        `);
+
+        $('body').append(notification);
+
+        // Animate in
+        setTimeout(() => notification.removeClass('translate-x-full'), 50);
+
+        // Auto-hide after 4 seconds
+        setTimeout(() => {
+            if (notification.length) {
+                notification.addClass('translate-x-full');
+                setTimeout(() => {
+                    notification.remove();
+                    window.showingNotification = false;
+                    processNotificationQueue();
+                }, 300);
+            }
+        }, 4000);
+    }
+
+    function processNotificationQueue() {
+        if (window.notificationQueue.length > 0 && !window.showingNotification) {
+            const next = window.notificationQueue.shift();
+            showNotification(next.message, next.type);
+        }
+    }
+</script>
+ *@
+ 
+ 
+ 
+ 
+ <script>
+    $(document).ready(function() {
+        // Get the anti-forgery token
+        function getAntiForgeryToken() {
+            return $('input[name="__RequestVerificationToken"]').val() ||
+                   $('form#add-vision-form input[name="__RequestVerificationToken"]').val();
+        }
+
+        // Handle authentication redirects
+        function handleAuthRedirect(xhr) {
+            try {
+                const response = JSON.parse(xhr.responseText);
+                if (response && response.redirectUrl) {
+                    window.location.href = response.redirectUrl;
+                    return true;
+                }
+            } catch (e) {
+                // Not JSON or no redirect
+            }
+            return false;
+        }
+
+        // Enhanced form submission with textarea support
+        $('#add-vision-form').on('submit', function(e) {
+            e.preventDefault();
+
+            const form = $(this);
+            const button = $('#add-future-vision');
+            const textarea = $('#future-vision-input');
+            const originalContent = button.html();
+            const text = textarea.val().trim();
+
+            if (!text) {
+                showNotification('⚠️ Please enter your vision or goal', 'error');
+                textarea.focus().addClass('ring-2 ring-red-500');
+                setTimeout(() => textarea.removeClass('ring-2 ring-red-500'), 2000);
+                return;
+            }
+
+            // Prevent duplicate submissions
+            if (button.prop('disabled')) return;
+
+            // Loading state
+            button.prop('disabled', true).html(`
+                <svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Adding...</span>
+            `);
+
+            $.ajax({
+                url: '/FutureVision/Add',
+                type: 'POST',
+                data: {
+                    text: text,
+                    __RequestVerificationToken: getAntiForgeryToken()
+                },
+                success: function (response) {
+                    textarea.val('').removeClass('ring-2 ring-red-500');
+                    // Reset textarea height
+                    textarea.css('height', 'auto');
+                    showNotification('✅ Vision added to your future board!', 'success');
+
+                    // Add to DOM instead of full reload to prevent duplicates
+                    if (response && response.html) {
+                        addVisionToDOM(response.html);
+                    } else {
+                        reloadFutureVision();
+                    }
+
+                    // Update collapsed view if it's open
+                    if (!$('#all-visions-content').hasClass('hidden')) {
+                        setTimeout(updateAllVisionsText, 100);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('Add failed:', xhr.responseText);
+
+                    // Check for auth redirect first
+                    if (handleAuthRedirect(xhr)) {
+                        return;
+                    }
+
+                    let errorMessage = '❌ Failed to add vision. Please try again.';
+
+                    if (xhr.status === 400) {
+                        errorMessage = '⚠️ Invalid request. Please check your input.';
+                    } else if (xhr.status === 401) {
+                        errorMessage = '🔒 Please log in to continue.';
+                        setTimeout(() => window.location.href = '/Account/Login', 2000);
+                    } else if (xhr.status === 403) {
+                        errorMessage = '🔒 Security validation failed. Please refresh the page.';
+                    } else if (xhr.status === 429) {
+                        errorMessage = '⏱️ Too many requests. Please wait a moment.';
+                    }
+
+                    showNotification(errorMessage, 'error');
+                },
+                complete: function() {
+                    button.prop('disabled', false).html(originalContent);
+                }
+            });
+        });
+
+        // Support Ctrl+Enter for form submission in textarea
+        $('#future-vision-input').on('keydown', function(e) {
+            if (e.ctrlKey && e.which === 13) {
+                e.preventDefault();
+                $('#add-vision-form').submit();
+            }
+        });
+
+        // Enhanced delete functionality with custom confirmation
+        $(document).on('click', '.delete-future-vision', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const button = $(this);
+            const id = button.data('id');
+            const visionElement = button.closest('li');
+            const visionText = visionElement.find('.future-vision-text').text().trim() ||
+                              visionElement.find('.vision-first-line').text().trim();
+            const truncatedText = visionText.length > 50 ? visionText.substring(0, 50) + '...' : visionText;
+
+            // Prevent multiple clicks
+            if (button.prop('disabled') || button.hasClass('deleting')) {
+                return;
+            }
+
+            // Show custom confirmation dialog
+            showCustomConfirmation({
+                title: '🗑️ Delete Vision?',
+                message: `"${truncatedText}"`,
+                subMessage: 'This action cannot be undone.',
+                confirmText: 'Delete',
+                cancelText: 'Cancel',
+                confirmClass: 'bg-red-500 hover:bg-red-600',
+                onConfirm: function() {
+                    // Prevent multiple simultaneous deletions
+                    if (button.prop('disabled') || button.hasClass('deleting')) {
+                        return;
+                    }
+
+                    // Mark as deleting and disable
+                    button.prop('disabled', true).addClass('deleting');
+
+                    // Visual feedback
+                    visionElement.addClass('opacity-50 pointer-events-none');
+
+                    $.ajax({
+                        url: '/FutureVision/Delete',
+                        type: 'POST',
+                        data: {
+                            id: id,
+                            __RequestVerificationToken: getAntiForgeryToken()
+                        },
+                        success: function(response) {
+                            showNotification('✅ Vision deleted successfully!', 'success');
+                            // Remove from DOM smoothly
+                            visionElement.fadeOut(300, function() {
+                                $(this).remove();
+                                // Update counter if needed
+                                updateVisionCounter();
+                                // Update collapsed view if it's open
+                                if (!$('#all-visions-content').hasClass('hidden')) {
+                                    setTimeout(updateAllVisionsText, 100);
+                                }
+                            });
+                        },
+                        error: function (xhr, status, error) {
+                            console.error('Delete failed:', xhr.responseText);
+
+                            // Check for auth redirect first
+                            if (handleAuthRedirect(xhr)) {
+                                return;
+                            }
+
+                            let errorMessage = '❌ Failed to delete vision. Please try again.';
+
+                            if (xhr.status === 401) {
+                                errorMessage = '🔒 Please log in to continue.';
+                                setTimeout(() => window.location.href = '/Account/Login', 2000);
+                            } else if (xhr.status === 404) {
+                                errorMessage = '⚠️ Vision not found. It may have been already deleted.';
+                                // Remove the element since it doesn't exist
+                                visionElement.fadeOut(300, function() {
+                                    $(this).remove();
+                                    updateVisionCounter();
+                                });
+                                return; // Don't restore the element
+                            } else if (xhr.status === 403) {
+                                errorMessage = '🔒 Security validation failed. Please refresh the page.';
+                            }
+
+                            showNotification(errorMessage, 'error');
+                            // Restore element state on error
+                            visionElement.removeClass('opacity-50 pointer-events-none');
+                        },
+                        complete: function() {
+                            // Always reset button state
+                            button.prop('disabled', false).removeClass('deleting');
+                        }
+                    });
+                },
+                onCancel: function() {
+                    // Reset button state on cancel
+                    button.prop('disabled', false).removeClass('deleting');
+                }
+            });
+        });
+
+        // Enhanced inline editing with debouncing to prevent multiple saves
+        let editTimeout = null;
+
+        $(document).on('focus', '.future-vision-text', function() {
+            const element = $(this);
+            element.addClass('ring-2 ring-accent/30 bg-white shadow-sm');
+            element.data('original', element.text().trim());
+        });
+
+        $(document).on('blur', '.future-vision-text', function () {
+            const element = $(this);
+            const id = element.data('id');
+            const newText = element.text().trim();
+            const originalText = element.data('original');
+
+            element.removeClass('ring-2 ring-accent/30 bg-white shadow-sm');
+
+            if (!newText) {
+                showNotification('⚠️ Vision cannot be empty', 'error');
+                element.text(originalText);
+                return;
+            }
+
+            if (newText === originalText) return; // No change
+
+            // Clear any existing timeout
+            if (editTimeout) {
+                clearTimeout(editTimeout);
+            }
+
+            // Debounce the save operation
+            editTimeout = setTimeout(() => {
+                // Check if element still exists and hasn't changed again
+                if (element.length && element.text().trim() === newText) {
+                    saveVisionEdit(element, id, newText, originalText);
+                }
+            }, 500);
+        });
+
+        function saveVisionEdit(element, id, newText, originalText) {
+            // Visual feedback during save
+            element.addClass('opacity-50 pointer-events-none');
+
+            $.ajax({
+                url: '/FutureVision/Edit',
+                type: 'POST',
+                data: {
+                    id: id,
+                    text: newText,
+                    __RequestVerificationToken: getAntiForgeryToken()
+                },
+                success: function(response) {
+                    showNotification('✅ Vision updated successfully!', 'success');
+                    element.removeClass('opacity-50 pointer-events-none');
+                    element.data('original', newText); // Update the original text
+
+                    // Update the preview if it exists
+                    const visionItem = element.closest('li');
+                    const preview = visionItem.find('.vision-preview');
+                    if (preview.length) {
+                        const lines = newText.split(/\r?\n/).filter(line => line.trim());
+                        const firstLine = lines[0] || newText;
+                        preview.find('.vision-first-line').text(firstLine);
+
+                        // Show/hide toggle based on multiple lines
+                        const toggleBtn = preview.find('.toggle-vision-btn');
+                        if (lines.length > 1) {
+                            toggleBtn.show();
+                        } else {
+                            toggleBtn.hide();
+                            // If single line, show the editable content and hide preview
+                            preview.addClass('hidden');
+                            element.removeClass('hidden');
+                        }
+                    }
+
+                    // Update collapsed view if it's open
+                    if (!$('#all-visions-content').hasClass('hidden')) {
+                        setTimeout(updateAllVisionsText, 100);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('Edit failed:', xhr.responseText);
+
+                    // Check for auth redirect first
+                    if (handleAuthRedirect(xhr)) {
+                        return;
+                    }
+
+                    let errorMessage = '❌ Failed to update vision. Please try again.';
+
+                    if (xhr.status === 400) {
+                        errorMessage = '⚠️ Invalid vision text. Please check your input.';
+                    } else if (xhr.status === 401) {
+                        errorMessage = '🔒 Please log in to continue.';
+                        setTimeout(() => window.location.href = '/Account/Login', 2000);
+                    } else if (xhr.status === 404) {
+                        errorMessage = '🔍 Vision not found. Please refresh the page.';
+                    } else if (xhr.status === 403) {
+                        errorMessage = '🔒 Security validation failed. Please refresh the page.';
+                    }
+
+                    showNotification(errorMessage, 'error');
+                    element.text(originalText);
+                    element.removeClass('opacity-50 pointer-events-none');
+                }
+            });
+        }
+
+        // Individual vision collapse/expand functionality
+        $(document).on('click', '.toggle-vision-btn', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const button = $(this);
+            const visionItem = button.closest('li');
+            const preview = visionItem.find('.vision-preview');
+            const fullContent = visionItem.find('.future-vision-text');
+            const isExpanded = button.data('expanded') === true;
+
+            if (isExpanded) {
+                // Collapse: Show preview, hide full content
+                fullContent.addClass('hidden');
+                preview.removeClass('hidden');
+                button.data('expanded', false);
+                button.find('.expand-text').removeClass('hidden');
+                button.find('.collapse-text').addClass('hidden');
+            } else {
+                // Expand: Hide preview, show full content
+                preview.addClass('hidden');
+                fullContent.removeClass('hidden');
+                button.data('expanded', true);
+                button.find('.expand-text').addClass('hidden');
+                button.find('.collapse-text').removeClass('hidden');
+            }
+        });
+
+        // Auto-resize textarea
+        $('#future-vision-input').on('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 150) + 'px';
+        });
+
+        // Toggle all visions view
+        $('#toggle-all-visions').on('click', function() {
+            const content = $('#all-visions-content');
+            const icon = $('#toggle-icon');
+
+            if (content.hasClass('hidden')) {
+                content.removeClass('hidden').hide().slideDown(300);
+                icon.addClass('rotate-180');
+                updateAllVisionsText();
+            } else {
+                content.slideUp(300, function() {
+                    $(this).addClass('hidden');
+                });
+                icon.removeClass('rotate-180');
+            }
+        });
+
+        // Copy all visions to clipboard with better feedback
+        $('#copy-all-visions').on('click', function() {
+            const textarea = $('#all-visions-textarea');
+            const content = textarea.val();
+
+            if (!content.trim()) {
+                showNotification('⚠️ No visions to copy', 'error');
+                return;
+            }
+
+            // Try modern clipboard API first
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(content).then(() => {
+                    showNotification('📋 All visions copied to clipboard!', 'success');
+                }).catch(() => {
+                    // Fallback to textarea selection
+                    copyFallback(textarea, content);
+                });
+            } else {
+                // Fallback for older browsers
+                copyFallback(textarea, content);
+            }
+        });
+
+        function copyFallback(textarea, content) {
+            try {
+                textarea.select();
+                textarea[0].setSelectionRange(0, 99999); // For mobile devices
+                document.execCommand('copy');
+                showNotification('📋 All visions copied to clipboard!', 'success');
+            } catch (err) {
+                console.error('Copy failed:', err);
+                showNotification('❌ Failed to copy to clipboard. Please select and copy manually.', 'error');
+                textarea.select();
+            }
+        }
+
+        // Export visions as text file with validation
+        $('#export-visions').on('click', function() {
+            const content = $('#all-visions-textarea').val();
+
+            if (!content.trim()) {
+                showNotification('⚠️ No visions to export', 'error');
+                return;
+            }
+
+            try {
+                const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+
+                a.href = url;
+                a.download = `Future_Visions_${new Date().toISOString().split('T')[0]}.txt`;
+                a.style.display = 'none';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+
+                showNotification('📁 Visions exported successfully!', 'success');
+            } catch (err) {
+                console.error('Export failed:', err);
+                showNotification('❌ Failed to export visions. Please try again.', 'error');
+            }
+        });
+
+        // Update all visions textarea
+        function updateAllVisionsText() {
+            const visions = [];
+            $('#future-vision-list li').each(function(index) {
+                const visionItem = $(this);
+                const fullText = visionItem.find('.future-vision-text').text().trim();
+                const previewText = visionItem.find('.vision-first-line').text().trim();
+
+                // Use full text if available, otherwise use preview text
+                const text = fullText || previewText;
+                if (text) {
+                    visions.push(`${index + 1}. ${text}`);
+                }
+            });
+
+            const textarea = $('#all-visions-textarea');
+            textarea.val(visions.join('\n\n'));
+
+            // Update word count
+            const wordCount = visions.join(' ').split(/\s+/).filter(word => word.length > 0).length;
+            $('#word-count').text(wordCount);
+        }
+
+        // Enter key support for inline editing
+        $(document).on('keypress', '.future-vision-text', function(e) {
+            if (e.which === 13) {
+                e.preventDefault();
+                $(this).blur();
+            }
+        });
+
+        // Escape key to cancel editing
+        $(document).on('keydown', '.future-vision-text', function(e) {
+            if (e.which === 27) { // Escape key
+                const original = $(this).data('original');
+                $(this).text(original).blur();
+            }
+        });
+
+        // Prevent form submission when pressing enter in contenteditable
+        $(document).on('keydown', '.future-vision-text', function(e) {
+            if (e.which === 13) {
+                e.preventDefault();
+                $(this).blur();
+            }
+        });
+    });
+
+    // Helper functions to prevent duplicate operations
+    function addVisionToDOM(html) {
+        const visionList = $('#future-vision-list');
+        const emptyState = $('.space-y-6').find('.flex.flex-col.items-center.justify-center');
+
+        if (emptyState.length) {
+            // Replace empty state with vision list
+            reloadFutureVision();
+        } else if (visionList.length) {
+            // Add to existing list
+            visionList.prepend(html);
+            updateVisionCounter();
+        } else {
+            // Fallback to full reload
+            reloadFutureVision();
+        }
+    }
+
+    function updateVisionCounter() {
+        const count = $('#future-vision-list li').length;
+        const counterElement = $('.text-accent.font-semibold.text-lg');
+        const descriptionElement = $('.text-sm.text-gray-600');
+
+        if (counterElement.length) {
+            counterElement.text(count);
+        }
+
+        if (descriptionElement.length) {
+            const visionWord = count === 1 ? 'vision' : 'visions';
+            descriptionElement.text(`${count} ${visionWord} for your future`);
+        }
+    }
+
+    function reloadFutureVision() {
+        const container = $('#future-vision-section').length ? $('#future-vision-section') : $('.space-y-6').parent();
+
+        // Prevent multiple simultaneous reloads
+        if (container.hasClass('reloading')) return;
+        container.addClass('reloading');
+
+        $.get('/FutureVision/Get', function(data) {
+            container.html(data);
+        }).fail(function(xhr) {
+            console.error('Reload failed:', xhr.responseText);
+
+            // Check for auth redirect
+            if (handleAuthRedirect && handleAuthRedirect(xhr)) {
+                return;
+            }
+
             showNotification('❌ Failed to reload vision board. Please refresh the page.', 'error');
         }).always(function() {
             container.removeClass('reloading');

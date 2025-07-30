@@ -1,5 +1,7 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using PlaniT.Data;
+using PlaniT.Models;
 
 namespace PlaniT
 {
@@ -17,6 +19,22 @@ namespace PlaniT
                           options => options.UseSqlServer(builder.Configuration.GetConnectionString("todoapp")));
 
 
+
+
+
+            builder.Services.AddIdentity<User, IdentityRole>(options =>
+            options.SignIn.RequireConfirmedAccount = false)
+                .AddRoles<IdentityRole>()
+       .AddEntityFrameworkStores<ApplicationDbContext>();
+
+
+            builder.Services.Configure<IdentityOptions>(options =>
+            {
+                options.Password.RequireDigit = false;
+
+
+            });
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -25,7 +43,7 @@ namespace PlaniT
                 app.UseExceptionHandler("/Home/Error");
             }
             app.UseRouting();
-
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapStaticAssets();
